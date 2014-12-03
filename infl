@@ -1,3 +1,4 @@
+#!/bin/env python
 # -*- coding: utf-8 -*-
 
 from logging import getLogger
@@ -11,6 +12,7 @@ def parsed_args():
 
     myhelp = """
     Usage:
+      {progname} [options] [(--logfile | --logboth)] [(--debug | --nolog)]
       {progname} [options] [(--logfile | --logboth)] [(--debug | --nolog)]  get (<query> | -f FILE)
       {progname} [options] [(--logfile | --logboth)] [(--debug | --nolog)]  put (<influxdb_point> | -f FILE)
       {progname} [options] [(--logfile | --logboth)] [(--debug | --nolog)]  getdb
@@ -92,6 +94,8 @@ def main(opts, handle_mgr  ):
         for id in [ point[res[0]['columns'].index('id')] for point in res[0]['points']]:
             client.query('drop continuous query {0}'.format(id))
         print client.csv_get('list continuous queries')
+    else:
+        print opts 
 
 
 if __name__ == '__main__':
