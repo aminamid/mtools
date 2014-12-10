@@ -107,8 +107,6 @@ if __name__ == '__main__':
 
     opts = parsed_args()
 
-
-
     if opts.logcfg:
         conf_dict = yaml.load(open(opts.logcfg))
     else:
@@ -125,5 +123,3 @@ if __name__ == '__main__':
     dictconfig.dictConfig( conf_dict )
 
     main(opts=opts)
-
-

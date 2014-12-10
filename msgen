@@ -17,6 +17,7 @@ def parsed_args():
 
     Options:
       -f FILE, --file=FILE  config filename [default: {progname}.cfg]
+      --logcfg <filename>   python logging-cfg file of yaml
       --logfile             out put log to file  [default: False]
       --logboth             out put log to file and console  [default: False]
       --logdir DIR          out put log to file  [default: ./dir]
@@ -28,6 +29,7 @@ def parsed_args():
     """
     myschema = Schema({
       '--file': Or(None, Use(open, error="Files should be readable")),
+      '--logcfg': Or(None, basestring),
       '--logfile': bool,
       '--logboth': bool,
       '--logdir': basestring,
@@ -40,7 +42,7 @@ def parsed_args():
     return mopts.parse(myhelp=myhelp, myschema=myschema, filepath=__file__)
 
 
-def main(opts, handle_mgr  ):
+def main(opts):
     from mutil import pp
     from mutil import mmsgen
     module_logger.debug('opts=[{0}]'.format(opts))
@@ -54,23 +56,27 @@ def main(opts, handle_mgr  ):
     for i in range(10):
         print msgiter.next()
 
-
-
 if __name__ == '__main__':
+    from mutil import dictconfig
     from mutil import mlog
+    import yaml
+
     opts = parsed_args()
 
-    logging_modules=[ __name__, 'mutil.msgen' ]
+    if opts.logcfg:
+        conf_dict = yaml.load(open(opts.logcfg))
+    else:
+        logging_modules=[ __name__, 'mutil.msgen' ]
+        conf_dict = mlog.gencfg(
+            names = logging_modules,
+            logdir = opts.logdir,
+            prefix = mlog.prefix(__file__),
+            postfix = 'log',
+            enable_stream = not opts.logfile ,
+            enable_file = opts.logboth or opts.logfile,
+            level = opts.loglevel,
+        )
+    dictconfig.dictConfig( conf_dict )
 
-    handle_mgr = mlog.HandleManager(
-        names = logging_modules,
-        logdir = opts.logdir,
-        prefix = mlog.prefix(__file__),
-        postfix = 'log',
-        enable_stream = not opts.logfile ,
-        enable_file = opts.logboth or opts.logfile,
-        level = opts.loglevel )
-
-    main(opts=opts, handle_mgr= handle_mgr)
-
+    main(opts=opts)
 
