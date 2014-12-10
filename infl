@@ -30,6 +30,7 @@ def parsed_args():
       -f FILE, --file=FILE  filename
       --force               force create if db is not exists [default: False]
       --separate DELIMIT    delimit by [default: ',']
+      --logcfg <filename>   python logging-cfg file of yaml
       --logfile             out put log to file  [default: False]
       --logboth             out put log to file and console  [default: False]
       --logdir DIR          out put log to file  [default: ./log]
@@ -58,6 +59,7 @@ def parsed_args():
       '--file': Or(None, Use(open, error="Files should be readable")),
       '--force': bool,
       '--separate': basestring,
+      '--logcfg': Or(None, basestring),
       '--logfile': bool,
       '--logboth': bool,
       '--logdir': basestring,
@@ -101,20 +103,26 @@ def main(opts):
 if __name__ == '__main__':
     from mutil import dictconfig
     from mutil import mlog
+    import yaml
 
     opts = parsed_args()
 
-    logging_modules=[ __name__, 'mutil.minf' ]
 
-    dictconfig.dictConfig( mlog.gencfg(
-        names = logging_modules,
-        logdir = opts.logdir,
-        prefix = mlog.prefix(__file__),
-        postfix = 'log',
-        enable_stream = not opts.logfile ,
-        enable_file = opts.logboth or opts.logfile,
-        level = opts.loglevel,
-    ))
+
+    if opts.logcfg:
+        conf_dict = yaml.load(open(opts.logcfg))
+    else:
+        logging_modules=[ __name__, 'mutil.minf' ]
+        conf_dict = mlog.gencfg(
+            names = logging_modules,
+            logdir = opts.logdir,
+            prefix = mlog.prefix(__file__),
+            postfix = 'log',
+            enable_stream = not opts.logfile ,
+            enable_file = opts.logboth or opts.logfile,
+            level = opts.loglevel,
+        )
+    dictconfig.dictConfig( conf_dict )
 
     main(opts=opts)
 
