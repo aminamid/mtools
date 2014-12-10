@@ -48,9 +48,7 @@ def main(opts, handle_mgr  ):
     
     module_logger.debug('opts=[{0}]'.format(pp.pprintf(opts)))
 
-    msgen_cfg = {}
-    with open(opts.file) as f:
-        msgen_cfg = yaml.load( f.read() )
+    msgen_cfg = yaml.load( opts.file.read() )
 
     msgiter = mmsgen.GenMsg(msgen_cfg)
     for i in range(10):
